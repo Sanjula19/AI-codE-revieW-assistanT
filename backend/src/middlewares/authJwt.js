@@ -1,26 +1,24 @@
 const jwt = require("jsonwebtoken");
-const authConfig = require("../config/auth.config.js");
+const authConfig = require("../../config/auth.config"); // 2 levels up
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
 verifyToken = (req, res, next) => {
-  let token = req.headers["authorization"];
+  let token = req.headers["x-access-token"] || req.headers["authorization"];
 
   if (!token) {
-    return res.status(403).send({
-      message: "No token provided!"
-    });
+    return res.status(403).send({ message: "No token provided!" });
   }
 
-  // Remove "Bearer " prefix if present
+  // Handle "Bearer <token>"
   if (token.startsWith("Bearer ")) {
-    token = token.slice(7, token.length);
+    token = token.slice(7, token.length).trim();
   }
 
   jwt.verify(token, authConfig.secret, (err, decoded) => {
     if (err) {
       return res.status(401).send({
-        message: "Unauthorized! Token is invalid or expired."
+        message: "Unauthorized! Token is invalid or expired.",
       });
     }
     req.userId = decoded.id;

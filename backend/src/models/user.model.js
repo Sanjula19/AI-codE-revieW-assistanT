@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const User = mongoose.model(
   "User",
@@ -28,7 +28,11 @@ const User = mongoose.model(
         type: mongoose.Schema.Types.ObjectId,
         ref: "Role"
       }
-    ]
+    ],
+    refreshToken: {  // ADD THIS FIELD
+      type: String,
+      default: null
+    }
   }, {
     timestamps: true
   })

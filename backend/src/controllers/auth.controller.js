@@ -1,5 +1,5 @@
 const db = require("../models");
-const config = require("../config/auth.config");
+const config = require("../../config/auth.config");
 const User = db.user;
 const Role = db.role;
 
@@ -137,6 +137,30 @@ exports.refreshToken = (req, res) => {
         accessToken: newToken,
         refreshToken: newRefreshToken
       });
+    });
+  });
+};
+
+exports.signout = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.userId, { refreshToken: null });
+    res.status(200).send({ message: "Logged out successfully!" });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
+exports.signout = (req, res) => {
+  User.findById(req.userId, (err, user) => {
+    if (err || !user) {
+      return res.status(500).send({ message: err || "User not found" });
+    }
+    user.refreshToken = null;
+    user.save((err) => {
+      if (err) {
+        return res.status(500).send({ message: err });
+      }
+      res.status(200).send({ message: "Logged out successfully!" });
     });
   });
 };
