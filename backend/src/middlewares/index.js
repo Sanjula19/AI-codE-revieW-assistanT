@@ -1,8 +1,8 @@
 // src/middlewares/index.js
-const verifySignUp = require("./verifySignUp");
 const authJwt = require("./authJwt");
+const verifySignUp = require("./verifySignUp");
 
 module.exports = {
-  verifySignUp,
   authJwt,
+  verifySignUp
 };
