@@ -1,133 +1,121 @@
 // src/controllers/auth.controller.js
-
 const db = require("../models");
 const User = db.user;
 const Role = db.role;
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const config = require("../../config/auth.config");
 
-exports.signup = async (req, res) => {
+// ──────────────────────────────────────────────────────────────
+//  SIGNUP
+// ──────────────────────────────────────────────────────────────
+const signup = async (req, res) => {
   try {
-    // Create new user
     const user = new User({
       username: req.body.username,
       email: req.body.email,
-      password: bcrypt.hashSync(req.body.password, 8), // Hash password
+      password: bcrypt.hashSync(req.body.password, 8),
     });
 
-    // Save user (no callback!)
     await user.save();
 
-    // Assign roles if provided
-    if (req.body.roles) {
-      const roles = await Role.find({ name: { $in: req.body.roles } });
-      user.roles = roles.map(role => role._id);
-      await user.save(); // Save again with roles
+    if (req.body.roles && req.body.roles.length) {
+      const foundRoles = await Role.find({ name: { $in: req.body.roles } });
+      user.roles = foundRoles.map((r) => r._id);
     } else {
-      // Default to "user" role
       const defaultRole = await Role.findOne({ name: "user" });
+      if (!defaultRole) throw new Error('Default role "user" not found');
       user.roles = [defaultRole._id];
-      await user.save();
     }
 
+    await user.save();
     res.send({ message: "User registered successfully!" });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
 
-exports.signin = async (req, res) => {
+// ──────────────────────────────────────────────────────────────
+//  SIGNIN
+// ──────────────────────────────────────────────────────────────
+const signin = async (req, res) => {
   try {
     const user = await User.findOne({ username: req.body.username }).populate("roles", "-__v");
-    if (!user) {
-      return res.status(404).send({ message: "User Not found." });
-    }
+    if (!user) return res.status(404).send({ message: "User Not found." });
 
     const passwordIsValid = bcrypt.compareSync(req.body.password, user.password);
     if (!passwordIsValid) {
-      return res.status(401).send({
-        accessToken: null,
-        message: "Invalid Password!"
-      });
+      return res.status(401).send({ accessToken: null, message: "Invalid Password!" });
     }
 
-    const token = jwt.sign({ id: user.id }, config.secret, {
-      expiresIn: config.jwtExpiration
+    const accessToken = jwt.sign({ id: user.id }, config.secret, {
+      expiresIn: config.jwtExpiration,
     });
 
-    const authorities = [];
-    for (let i = 0; i < user.roles.length; i++) {
-      authorities.push("ROLE_" + user.roles[i].name.toUpperCase());
-    }
+    const refreshToken = jwt.sign({ id: user.id }, config.refreshSecret, {
+      expiresIn: config.jwtRefreshExpiration,
+    });
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
+    const authorities = user.roles.map((r) => "ROLE_" + r.name.toUpperCase());
 
     res.status(200).send({
       id: user._id,
       username: user.username,
       email: user.email,
       roles: authorities,
-      accessToken: token,
+      accessToken,
+      refreshToken,
     });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
 
-exports.refreshToken = (req, res) => {
-  const { refreshToken } = req.body;
+// ──────────────────────────────────────────────────────────────
+//  REFRESH TOKEN
+// ──────────────────────────────────────────────────────────────
+const refreshToken = async (req, res) => {
+  const { refreshToken: incoming } = req.body;
+  if (!incoming) return res.status(403).send({ message: "Refresh Token required!" });
 
-  if (!refreshToken) {
-    return res.status(403).send({ message: "Refresh Token is required!" });
-  }
-
-  jwt.verify(refreshToken, config.refreshSecret, (err, decoded) => {
-    if (err) {
-      return res.status(401).send({ message: "Invalid Refresh Token!" });
+  try {
+    const decoded = jwt.verify(incoming, config.refreshSecret);
+    const user = await User.findById(decoded.id);
+    if (!user || user.refreshToken !== incoming) {
+      return res.status(403).send({ message: "Invalid Refresh Token!" });
     }
 
-    User.findById(decoded.id).exec((err, user) => {
-      if (err) {
-        return res.status(500).send({ message: err });
-      }
-
-      if (!user) {
-        return res.status(404).send({ message: "User not found!" });
-      }
-
-      const newToken = jwt.sign({ id: user.id }, config.secret, {
-        expiresIn: config.jwtExpiration
-      });
-
-      const newRefreshToken = jwt.sign({ id: user.id }, config.refreshSecret, {
-        expiresIn: config.jwtRefreshExpiration
-      });
-
-      res.status(200).send({
-        accessToken: newToken,
-        refreshToken: newRefreshToken
-      });
+    const newAccessToken = jwt.sign({ id: user.id }, config.secret, {
+      expiresIn: config.jwtExpiration,
     });
-  });
+
+    res.send({ accessToken: newAccessToken, refreshToken: incoming });
+  } catch (err) {
+    res.status(403).send({ message: "Invalid or expired token!" });
+  }
 };
 
-exports.signout = async (req, res) => {
+// ──────────────────────────────────────────────────────────────
+//  SIGNOUT
+// ──────────────────────────────────────────────────────────────
+const signout = async (req, res) => {
   try {
     await User.findByIdAndUpdate(req.userId, { refreshToken: null });
-    res.status(200).send({ message: "Logged out successfully!" });
+    res.send({ message: "Logged out successfully!" });
   } catch (err) {
     res.status(500).send({ message: err.message });
   }
 };
 
-exports.signout = (req, res) => {
-  User.findById(req.userId, (err, user) => {
-    if (err || !user) {
-      return res.status(500).send({ message: err || "User not found" });
-    }
-    user.refreshToken = null;
-    user.save((err) => {
-      if (err) {
-        return res.status(500).send({ message: err });
-      }
-      res.status(200).send({ message: "Logged out successfully!" });
-    });
-  });
+// ──────────────────────────────────────────────────────────────
+//  EXPORT ALL
+// ──────────────────────────────────────────────────────────────
+module.exports = {
+  signup,
+  signin,
+  refreshToken,
+  signout,
 };
