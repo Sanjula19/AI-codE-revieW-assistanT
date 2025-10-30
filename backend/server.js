@@ -1,6 +1,8 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const mongoose = require("mongoose");
+const cookieSession = require("cookie-session");
 require("dotenv").config();
 
 const app = express();
@@ -8,28 +10,42 @@ const app = express();
 // ====================
 // Middleware
 // ====================
-app.use(cors());
+app.use(cors({
+  origin: "http://localhost:3000", // React frontend
+  credentials: true
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Cookie Session for Google OAuth
+app.use(cookieSession({
+  name: "session",
+  keys: [process.env.SESSION_SECRET],
+  maxAge: 24 * 60 * 60 * 1000, // 24 hours
+  secure: false, // set true in production with HTTPS
+  httpOnly: true,
+  sameSite: 'lax'
+}));
+
 // ====================
-// Config Imports
+// Passport (Google OAuth)
 // ====================
-const authConfig = require("./config/auth.config");
-const dbConfig = require("./config/db.config");
+const passport = require("./config/passport.config"); // ← Corrected path (config/ in root)
+app.use(passport.initialize());
+app.use(passport.session());
 
 // ====================
 // Database Connection
 // ====================
+const dbConfig = require("./config/db.config");
 const dbURI = process.env.MONGODB_URI || `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`;
 
-mongoose
-  .connect(dbURI)  // Removed deprecated options
+mongoose.connect(dbURI)
   .then(() => {
     console.log("Successfully connected to MongoDB.");
-    initializeRoles();  // Initialize default roles
+    initializeRoles();
   })
-  .catch((err) => {
+  .catch(err => {
     console.error("MongoDB connection error:", err);
     process.exit(1);
   });
@@ -41,17 +57,16 @@ const db = require("./src/models");
 const Role = db.role;
 
 // ====================
-// Initialize Default Roles (Async/Await)
+// Initialize Default Roles
 // ====================
 async function initializeRoles() {
   try {
-    const count = await Role.estimatedDocumentCount();  // No callback, use await
+    const count = await Role.estimatedDocumentCount();
     if (count === 0) {
       const roles = ["user", "moderator", "admin"];
-      for (const roleName of roles) {
-        const role = new Role({ name: roleName });
-        await role.save();  // Await save
-        console.log(`Added '${roleName}' to roles collection`);
+      for (const name of roles) {
+        await new Role({ name }).save();
+        console.log(`Added '${name}' to roles collection`);
       }
     }
   } catch (err) {
@@ -66,31 +81,37 @@ async function initializeRoles() {
 // Home / API Info
 app.get("/", (req, res) => {
   res.json({
-    message: "Welcome to JWT Authentication API",
-    documentation: `http://localhost:${PORT}`,
+    message: "Welcome to JWT + Google OAuth API",
+    isAuthenticated: req.isAuthenticated?.() || false,
+    user: req.user ? {
+      id: req.user.id,
+      username: req.user.username,
+      email: req.user.email
+    } : null,
     endpoints: {
       auth: {
         signup: "POST /api/auth/signup",
         signin: "POST /api/auth/signin",
         refreshtoken: "POST /api/auth/refreshtoken",
         signout: "POST /api/auth/signout",
+        google: "GET /api/auth/google",
+        logout: "GET /api/auth/logout"
       },
       test: {
         public: "GET /api/test/all",
         user: "GET /api/test/user",
-        moderator: "GET /api/test/mod",
-        admin: "GET /api/test/admin",
+        mod: "GET /api/test/mod",
+        admin: "GET /api/test/admin"
       },
-      user: {
-        profile: "GET /api/user/profile",
-      },
-    },
+      profile: "GET /api/user/profile"
+    }
   });
 });
 
 // Load Routes
 require("./src/routes/auth.routes")(app);
 require("./src/routes/user.routes")(app);
+require("./src/routes/google.routes")(app);  // Google OAuth Routes
 
 // ====================
 // 404 Handler
@@ -100,10 +121,17 @@ app.use((req, res) => {
 });
 
 // ====================
+// Error Handler
+// ====================
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ message: "Something went wrong!" });
+});
+
+// ====================
 // Start Server
 // ====================
 const PORT = process.env.PORT || 5000;
-
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
   console.log(`API Documentation: http://localhost:${PORT}`);
