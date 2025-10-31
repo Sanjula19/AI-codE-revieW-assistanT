@@ -10,16 +10,13 @@ verifyToken = (req, res, next) => {
     return res.status(403).send({ message: "No token provided!" });
   }
 
-  // Handle "Bearer <token>"
   if (token.startsWith("Bearer ")) {
-    token = token.slice(7, token.length).trim();
+    token = token.slice(7, token.length);
   }
 
   jwt.verify(token, authConfig.secret, (err, decoded) => {
     if (err) {
-      return res.status(401).send({
-        message: "Unauthorized! Token is invalid or expired.",
-      });
+      return res.status(401).send({ message: "Unauthorized! Token is invalid or expired." });
     }
     req.userId = decoded.id;
     next();
