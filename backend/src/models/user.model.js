@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const User = mongoose.model(
   "User",
@@ -20,19 +20,26 @@ const User = mongoose.model(
     },
     password: {
       type: String,
-      required: true,
+      required: false,  // Not required for Google users
       minlength: 6
     },
+    // Google OAuth fields
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true  // Allows nulls without unique conflict
+    },
+    firstName: String,
+    lastName: String,
+    picture: String,  // Google profile pic URL
+    // Existing fields
     roles: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Role"
       }
     ],
-    refreshToken: {  // ADD THIS FIELD
-      type: String,
-      default: null
-    }
+    refreshToken: { type: String, default: null }
   }, {
     timestamps: true
   })
