@@ -1,0 +1,50 @@
+{
+  "info": { "name": "Phase 2 - Code Review API", "_postman_id": "phase2" },
+  "item": [
+    {
+      "name": "1. Sign In",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\"username\":\"test\",\"password\":\"123456\"}" },
+        "url": "http://localhost:5000/api/auth/signin"
+      }
+    },
+    {
+      "name": "2. Upload Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "x-access-token", "value": "{{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"codeText\":\"console.log('Hello AI');\",\"language\":\"javascript\"}"
+        },
+        "url": "http://localhost:5000/api/code/upload"
+      }
+    },
+    {
+      "name": "3. Get History",
+      "request": {
+        "method": "GET",
+        "header": [{ "key": "x-access-token", "value": "{{token}}" }],
+        "url": "http://localhost:5000/api/code/history"
+      }
+    },
+    {
+      "name": "4. Update Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "x-access-token", "value": "{{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": { "mode": "raw", "raw": "{\"firstName\":\"Neo\",\"lastName\":\"Coder\"}" },
+        "url": "http://localhost:5000/api/user/profile"
+      }
+    }
+  ],
+  "variable": [{ "key": "token", "value": "" }]
+}

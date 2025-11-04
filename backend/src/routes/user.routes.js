@@ -38,5 +38,10 @@ module.exports = function (app) {
     controller.getUserProfile
   );
 
+app.put(
+  "/api/user/profile",
+  [authJwt.verifyToken],
+  controller.updateProfile
+);
 
 };

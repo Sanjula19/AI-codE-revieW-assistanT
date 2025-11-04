@@ -29,8 +29,11 @@ const User = mongoose.model(
       unique: true,
       sparse: true  // Allows nulls without unique conflict
     },
-    firstName: String,
-    lastName: String,
+   
+firstName: { type: String, trim: true },
+lastName:  { type: String, trim: true },
+
+
     picture: String,  // Google profile pic URL
     // Existing fields
     roles: [

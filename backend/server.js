@@ -5,6 +5,8 @@ const mongoose = require("mongoose");
 const cookieSession = require("cookie-session");
 require("dotenv").config();
 
+
+
 const app = express();
 
 // ====================
@@ -112,7 +114,7 @@ app.get("/", (req, res) => {
 require("./src/routes/auth.routes")(app);
 require("./src/routes/user.routes")(app);
 require("./src/routes/google.routes")(app);  // Google OAuth Routes
-
+require("./src/routes/code.routes")(app);
 // ====================
 // 404 Handler
 // ====================
