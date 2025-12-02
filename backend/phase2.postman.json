@@ -1,0 +1,114 @@
+{
+  "info": {
+    "name": "Phase 2 - Code Review API",
+    "_postman_id": "phase2-collection",
+    "description": "API endpoints for Phase 2: Auth, Code Upload, History, and Profile Update",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Sign In",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"username\":\"test\",\"password\":\"123456\"}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/auth/signin",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "auth", "signin"]
+        }
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "try {",
+              "  const json = pm.response.json();",
+              "  const token = json.accessToken || json.token || (json.data && json.data.accessToken) || json.access_token;",
+              "  if (token) {",
+              "    pm.environment.set('token', token);",
+              "    pm.test('Token saved to environment', () => pm.expect(token).to.be.a('string'));",
+              "  } else {",
+              "    pm.test('Token not found in response', () => pm.expect(token).to.exist);",
+              "  }",
+              "} catch (e) {",
+              "  pm.test('Response is not JSON', () => pm.expect.fail('Invalid JSON response'));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Upload Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "x-access-token", "value": "{{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"codeText\":\"console.log('Hello AI');\",\"language\":\"javascript\"}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/code/upload",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "code", "upload"]
+        }
+      }
+    },
+    {
+      "name": "3. Get History",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "x-access-token", "value": "{{token}}" }
+        ],
+        "url": {
+          "raw": "http://localhost:5000/api/code/history",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "code", "history"]
+        }
+      }
+    },
+    {
+      "name": "4. Update Profile",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "x-access-token", "value": "{{token}}" },
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\"firstName\":\"Neo\",\"lastName\":\"Coder\"}"
+        },
+        "url": {
+          "raw": "http://localhost:5000/api/user/profile",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "5000",
+          "path": ["api", "user", "profile"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    { "key": "token", "value": "" }
+  ]
+}

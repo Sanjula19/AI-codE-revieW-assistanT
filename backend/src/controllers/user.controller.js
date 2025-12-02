@@ -45,10 +45,38 @@ const getUserProfile = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const allowed = ['firstName', 'lastName', 'username', 'email'];
+    const updates = {};
+
+    allowed.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field];
+      }
+    });
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).send({ message: "No fields to update!" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.userId,
+      updates,
+      { new: true, runValidators: true }
+    ).select('-password -refreshToken');
+
+    res.send({ message: "Profile updated!", user });
+  } catch (err) {
+    res.status(500).send({ message: err.message });
+  }
+};
+
 module.exports = {
   allAccess,
   userBoard,
   adminBoard,
   moderatorBoard,
-  getUserProfile
+  getUserProfile,
+  updateProfile
 };
