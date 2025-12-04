@@ -1,11 +1,10 @@
-// src/models/analysis.model.js
 const mongoose = require("mongoose");
 
 const AnalysisSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-    required: true
+    required: false // Changed to false to allow null for unauthenticated users
   },
   code: { type: String, required: true },
   language: { type: String, default: "javascript" },

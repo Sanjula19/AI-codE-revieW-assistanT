@@ -1,10 +1,9 @@
-// src/routes/analysis.routes.js
 const express = require("express");
 const router = express.Router();
 
 // Import your model and AI service
-const Analysis = require("../models/analysis.model");           // ← your model
-const { sendToAI } = require("../services/ai.service");        // ← your service (with Redis)
+const Analysis = require("../models/analysis.model");           
+const { sendToAI } = require("../services/ai.service");        
 
 // POST /api/v1/analysis → Analyze code
 router.post("/", async (req, res) => {
@@ -31,7 +30,7 @@ router.post("/", async (req, res) => {
       userId: req.userId || null, // optional: track user if logged in
       code,
       language,
-      qualityScore: result.data.score,
+      qualityScore: result.data.qualityScore,
       issues: result.data.errors,
       recommendations: result.data.suggestions,
       securityIssues: result.data.securityIssues || 0,

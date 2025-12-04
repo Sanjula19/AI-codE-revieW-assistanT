@@ -1,4 +1,3 @@
-// src/models/codeReview.model.js
 const mongoose = require('mongoose');
 
 const CodeReviewSchema = new mongoose.Schema({
@@ -7,7 +6,7 @@ const CodeReviewSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  codeText: {
+  code: { // Renamed from codeText to match service
     type: String,
     required: true,
     trim: true
@@ -17,9 +16,20 @@ const CodeReviewSchema = new mongoose.Schema({
     default: 'plaintext',
     enum: ['javascript', 'python', 'java', 'cpp', 'go', 'rust', 'typescript', 'plaintext']
   },
-  analysisResult: {
+  filename: { // Added to match service
     type: String,
-    default: null
+    default: 'untitled'
+  },
+  aiResponse: { // Changed from analysisResult (String) to object to match service
+    qualityScore: { type: Number, default: 0 },
+    suggestions: [String],
+    errors: [String],
+    securityIssues: { type: Number, default: 0 },
+    bestPractices: { type: Boolean, default: false }
+  },
+  suggestionCount: { // Added to match service
+    type: Number,
+    default: 0
   },
   status: {
     type: String,

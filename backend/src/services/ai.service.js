@@ -1,4 +1,3 @@
-// src/services/ai.service.js
 const axios = require('axios');
 const Redis = require('ioredis');
 const logger = require('../utils/logger');
@@ -17,8 +16,8 @@ const getCacheKey = (code, language = "javascript") => {
   return `ai_analysis:${hash}`;
 };
 
-// MAIN FUNCTION — WITH REDIS CACHING (YOUR STEP 5)
-const analyzeCodeCached = async (code, language = "javascript") => {
+// MAIN FUNCTION — WITH REDIS CACHING
+const sendToAI = async (code, language = "javascript") => {
   const cacheKey = getCacheKey(code, language);
 
   try {
@@ -37,7 +36,7 @@ const analyzeCodeCached = async (code, language = "javascript") => {
     const response = await axios.post(AI_URL, { code, language }, { timeout: 15000 });
 
     const result = {
-      score: response.data.qualityScore || response.data.score,
+      qualityScore: response.data.qualityScore,
       errors: response.data.issues || [],
       suggestions: response.data.recommendations || [],
       securityIssues: response.data.securityIssues || 0,
@@ -63,4 +62,4 @@ const analyzeCodeCached = async (code, language = "javascript") => {
   }
 };
 
-module.exports = { analyzeCodeCached };
+module.exports = { sendToAI };
