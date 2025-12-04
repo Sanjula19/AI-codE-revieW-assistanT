@@ -1,4 +1,3 @@
-// src/services/code.service.js
 const CodeReview = require('../models/codeReview.model');
 const { sendToAI } = require('./ai.service');
 const logger = require('../utils/logger');
@@ -17,7 +16,7 @@ const uploadCode = async (userId, { code, language, filename }) => {
   if (aiResult.success) {
     review.status = "completed";
     review.aiResponse = {
-      score: aiResult.data.score || 0,
+      qualityScore: aiResult.data.qualityScore || 0,
       suggestions: aiResult.data.suggestions || [],
       errors: aiResult.data.errors || [],
       securityIssues: aiResult.data.securityIssues || 0,
