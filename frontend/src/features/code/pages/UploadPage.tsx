@@ -3,7 +3,7 @@ import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { Button } from '../../../components/ui/Button';
 import { CodeEditor } from '../../../components/ui/CodeEditor';
 import { Play, Upload } from 'lucide-react';
-import { codeApi } from '../api/code.ts';
+import { codeApi } from '../api/code';
 import { useNavigate } from 'react-router-dom';
 
 export const UploadPage = () => {

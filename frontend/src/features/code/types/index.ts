@@ -1,3 +1,5 @@
+// src/features/code/types/index.ts
+
 export interface CodeUploadRequest {
   codeText: string;
   language: string;

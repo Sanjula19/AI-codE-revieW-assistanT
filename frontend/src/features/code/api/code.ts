@@ -1,5 +1,7 @@
 import { api } from '../../../lib/axios';
-import { CodeUploadRequest, AnalysisResult }from '../features/code/types/index.ts';
+// ✅ FIX: Added the word 'type' after import
+import type { CodeUploadRequest, AnalysisResult } from '../types/index';
+
 export const codeApi = {
   analyze: async (data: CodeUploadRequest): Promise<AnalysisResult> => {
     // We send the code to /code/upload

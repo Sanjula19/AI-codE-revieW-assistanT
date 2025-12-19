@@ -54,3 +54,13 @@
 - **Typed API Calls:** Defining the `CodeUploadRequest` interface prevents me from sending the wrong data to the backend.
 
 ---
+## [6] - Feature: Code Analysis Pipeline
+**What I Built:**
+- Created a `CodeController` in Node.js to handle upload requests.
+- Defined a `POST /api/code/upload` route using Express Router.
+- Connected the Frontend `UploadPage` to the Backend using Axios.
+- Implemented a "Mock Response" to verify the connection before adding AI.
+
+**New Things I Learned:**
+- **Mocking APIs:** It is useful to make the backend return "fake data" first. This proves the connection works before spending time building complex logic (like AI).
+- **Refactoring Routes:** Switching from `app.use(func)` to `express.Router()` makes the backend code much cleaner and easier to manage.
