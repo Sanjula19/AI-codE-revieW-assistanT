@@ -4,6 +4,7 @@ import { Button } from './components/ui/Button';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { UploadPage } from './features/code/pages/UploadPage';
+import { AnalysisResultsPage } from './features/code/pages/AnalysisResultsPage';
 // 1. Create a dummy Dashboard page component for testing
 const DashboardHome = () => (
   <div className="space-y-6">
@@ -45,7 +46,7 @@ function App() {
         <Route path="/history" element={<DashboardLayout><h1>History Page</h1></DashboardLayout>} />
         <Route path="/profile" element={<DashboardLayout><h1>Profile Page</h1></DashboardLayout>} />
         <Route path="/settings" element={<DashboardLayout><h1>Settings Page</h1></DashboardLayout>} />
-       
+       <Route path="/results" element={<AnalysisResultsPage />} />
         
       </Routes>
     </BrowserRouter>

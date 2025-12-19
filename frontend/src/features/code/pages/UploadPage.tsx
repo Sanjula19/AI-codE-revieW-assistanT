@@ -32,8 +32,8 @@ export const UploadPage = () => {
       // 3. Success! 
       // Ideally, we navigate to a "Results Page" with the reviewId.
       // For now, let's just alert success so we know it worked.
-      alert(`Analysis Started! ID: ${result.reviewId}`);
       
+      navigate('/results', { state: result });
       // navigate(`/results/${result.reviewId}`); // We will build this next
 
     } catch (error) {
