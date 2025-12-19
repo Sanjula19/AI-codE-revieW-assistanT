@@ -64,3 +64,13 @@
 **New Things I Learned:**
 - **Mocking APIs:** It is useful to make the backend return "fake data" first. This proves the connection works before spending time building complex logic (like AI).
 - **Refactoring Routes:** Switching from `app.use(func)` to `express.Router()` makes the backend code much cleaner and easier to manage.
+
+## [7] - Feature: AI Integration
+**What I Built:**
+- Installed `axios` in the backend to communicate with the Python service.
+- Updated `code.controller.js` to forward requests to the Python AI Engine (Port 8080).
+- Successfully tested the full pipeline: Frontend -> Node API -> Python AI -> Node API -> Frontend.
+
+**New Things I Learned:**
+- **Microservices Communication:** How to make one backend service (Node) talk to another (Python) using HTTP requests.
+- **Inter-Process Debugging:** Learned that connection errors (like ECONNREFUSED) often mean a service (like Redis or Python) isn't running or reachable.
