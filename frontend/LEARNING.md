@@ -35,3 +35,9 @@
 **New Things I Learned:**
 - **Wiring Forms:** A UI component needs state (`useState`) and a handler (`handleSubmit`) to actually send data.
 - **The "Network Tab" Test:** The best way to debug API calls is watching the browser's Network tab, not just looking at the UI.
+
+## [4] - Feature: Auth Completion
+**What I Built:**
+- Fixed CORS issues by configuring the backend to accept requests from port 5173.
+- Successfully registered a user and logged in to the Dashboard.
+- Debugged 404 errors by checking the Network tab payload (Username vs Email).
