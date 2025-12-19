@@ -3,22 +3,47 @@ import { DashboardLayout } from '../../../components/layout/DashboardLayout';
 import { Button } from '../../../components/ui/Button';
 import { CodeEditor } from '../../../components/ui/CodeEditor';
 import { Play, Upload } from 'lucide-react';
+import { codeApi } from '../api/code.ts';
+import { useNavigate } from 'react-router-dom';
 
 export const UploadPage = () => {
+  const navigate = useNavigate(); // Hook to change pages
   const [code, setCode] = useState('// Paste your code here...');
   const [language, setLanguage] = useState('javascript');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const handleAnalyze = async () => {
-    if (!code.trim()) return;
+    if (!code.trim()) {
+      alert("Please enter some code first!");
+      return;
+    }
     
     setIsAnalyzing(true);
-    // TODO: We will connect this to the API in the next step
-    console.log("Analyzing code:", { language, code });
-    
-    // Simulate a delay for now
-    setTimeout(() => setIsAnalyzing(false), 2000);
+
+    try {
+      // 2. Call the API
+      const result = await codeApi.analyze({
+        codeText: code,
+        language: language
+      });
+
+      console.log("Analysis Result:", result);
+
+      // 3. Success! 
+      // Ideally, we navigate to a "Results Page" with the reviewId.
+      // For now, let's just alert success so we know it worked.
+      alert(`Analysis Started! ID: ${result.reviewId}`);
+      
+      // navigate(`/results/${result.reviewId}`); // We will build this next
+
+    } catch (error) {
+      console.error("Analysis failed:", error);
+      alert("Failed to analyze code. Check console for details.");
+    } finally {
+      setIsAnalyzing(false);
+    }
   };
+    
 
   return (
     <DashboardLayout>

@@ -41,3 +41,16 @@
 - Fixed CORS issues by configuring the backend to accept requests from port 5173.
 - Successfully registered a user and logged in to the Dashboard.
 - Debugged 404 errors by checking the Network tab payload (Username vs Email).
+
+## [5] - Feature: Code Analysis Setup
+**What I Built:**
+- Integrated Monaco Editor for code input.
+- Created `feature/code-analysis` branch.
+- Defined TypeScript interfaces for `AnalysisResult`.
+- Connected the "Analyze" button to the `/api/code/upload` endpoint.
+
+**New Things I Learned:**
+- **Monaco Editor:** It requires a wrapper component to handle sizing and value changes properly in React.
+- **Typed API Calls:** Defining the `CodeUploadRequest` interface prevents me from sending the wrong data to the backend.
+
+---
