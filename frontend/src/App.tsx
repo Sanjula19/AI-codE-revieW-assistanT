@@ -1,7 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Button } from './components/ui/Button';
-
+import { LoginPage } from './features/auth/pages/LoginPage';
+import { RegisterPage } from './features/auth/pages/RegisterPage';
 // 1. Create a dummy Dashboard page component for testing
 const DashboardHome = () => (
   <div className="space-y-6">
@@ -42,6 +43,8 @@ function App() {
         <Route path="/history" element={<DashboardLayout><h1>History Page</h1></DashboardLayout>} />
         <Route path="/profile" element={<DashboardLayout><h1>Profile Page</h1></DashboardLayout>} />
         <Route path="/settings" element={<DashboardLayout><h1>Settings Page</h1></DashboardLayout>} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
       </Routes>
     </BrowserRouter>
   );
