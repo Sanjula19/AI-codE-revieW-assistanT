@@ -3,6 +3,7 @@ import { DashboardLayout } from './components/layout/DashboardLayout';
 import { Button } from './components/ui/Button';
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
+import { UploadPage } from './features/code/pages/UploadPage';
 // 1. Create a dummy Dashboard page component for testing
 const DashboardHome = () => (
   <div className="space-y-6">
@@ -27,7 +28,8 @@ function App() {
       <Routes>
         {/* Redirect root "/" to "/dashboard" for now */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
-
+ <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         {/* Dashboard Route with Layout */}
         <Route 
           path="/dashboard" 
@@ -37,14 +39,14 @@ function App() {
             </DashboardLayout>
           } 
         />
-        
+        <Route path="/upload" element={<UploadPage />} />
         {/* Add placeholders for other routes so links don't crash */}
         <Route path="/upload" element={<DashboardLayout><h1>Upload Page</h1></DashboardLayout>} />
         <Route path="/history" element={<DashboardLayout><h1>History Page</h1></DashboardLayout>} />
         <Route path="/profile" element={<DashboardLayout><h1>Profile Page</h1></DashboardLayout>} />
         <Route path="/settings" element={<DashboardLayout><h1>Settings Page</h1></DashboardLayout>} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+       
+        
       </Routes>
     </BrowserRouter>
   );
