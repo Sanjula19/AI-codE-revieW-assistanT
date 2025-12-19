@@ -26,3 +26,12 @@
 - **Component Composition:** Passing `children` to `AuthLayout` allows me to reuse the same wrapper for Login, Register, and Forgot Password.
 
 ---
+## [3] - Feature: Auth Integration
+**What I Built:**
+- Connected `LoginPage` to `AuthProvider` using `useState` and `onSubmit`.
+- Configured Axios interceptors to attach tokens automatically.
+- Defined TypeScript interfaces for API responses.
+
+**New Things I Learned:**
+- **Wiring Forms:** A UI component needs state (`useState`) and a handler (`handleSubmit`) to actually send data.
+- **The "Network Tab" Test:** The best way to debug API calls is watching the browser's Network tab, not just looking at the UI.
