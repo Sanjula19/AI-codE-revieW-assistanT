@@ -41,3 +41,36 @@
 - Fixed CORS issues by configuring the backend to accept requests from port 5173.
 - Successfully registered a user and logged in to the Dashboard.
 - Debugged 404 errors by checking the Network tab payload (Username vs Email).
+
+## [5] - Feature: Code Analysis Setup
+**What I Built:**
+- Integrated Monaco Editor for code input.
+- Created `feature/code-analysis` branch.
+- Defined TypeScript interfaces for `AnalysisResult`.
+- Connected the "Analyze" button to the `/api/code/upload` endpoint.
+
+**New Things I Learned:**
+- **Monaco Editor:** It requires a wrapper component to handle sizing and value changes properly in React.
+- **Typed API Calls:** Defining the `CodeUploadRequest` interface prevents me from sending the wrong data to the backend.
+
+---
+## [6] - Feature: Code Analysis Pipeline
+**What I Built:**
+- Created a `CodeController` in Node.js to handle upload requests.
+- Defined a `POST /api/code/upload` route using Express Router.
+- Connected the Frontend `UploadPage` to the Backend using Axios.
+- Implemented a "Mock Response" to verify the connection before adding AI.
+
+**New Things I Learned:**
+- **Mocking APIs:** It is useful to make the backend return "fake data" first. This proves the connection works before spending time building complex logic (like AI).
+- **Refactoring Routes:** Switching from `app.use(func)` to `express.Router()` makes the backend code much cleaner and easier to manage.
+
+## [7] - Feature: AI Integration
+**What I Built:**
+- Installed `axios` in the backend to communicate with the Python service.
+- Updated `code.controller.js` to forward requests to the Python AI Engine (Port 8080).
+- Successfully tested the full pipeline: Frontend -> Node API -> Python AI -> Node API -> Frontend.
+
+**New Things I Learned:**
+- **Microservices Communication:** How to make one backend service (Node) talk to another (Python) using HTTP requests.
+- **Inter-Process Debugging:** Learned that connection errors (like ECONNREFUSED) often mean a service (like Redis or Python) isn't running or reachable.
