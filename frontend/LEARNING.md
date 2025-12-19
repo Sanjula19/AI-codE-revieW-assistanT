@@ -1,6 +1,6 @@
 # 🧠 My Dev Learning Journal
 
-##  Feature: Project Setup & Layout
+## 01 Feature: Project Setup & Layout
 **What I Built:**
 - Initialized React + Vite + Tailwind.
 - Created reusable UI components (Button, Input).
@@ -15,3 +15,14 @@
 - **Router Error:** I accidentally nested `<BrowserRouter>` inside another `<BrowserRouter>`. 
   - *Fix:* Removed the router from `main.tsx` and kept it only in `App.tsx`.
 
+## [02] - Feature: Authentication UI (Login)
+**What I Built:**
+- Created `AuthLayout` to center content and display the logo (separate from DashboardSidebar).
+- Built `LoginPage` using the reusable `Input` and `Button` components.
+- Integrated `react-router-dom` Links to switch between Login/Signup without page reloads.
+
+**New Things I Learned:**
+- **Layout Pattern:** Apps often need multiple layouts (e.g., `DashboardLayout` for the app, `AuthLayout` for login).
+- **Component Composition:** Passing `children` to `AuthLayout` allows me to reuse the same wrapper for Login, Register, and Forgot Password.
+
+---
