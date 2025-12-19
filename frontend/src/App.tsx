@@ -1,35 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { DashboardLayout } from './components/layout/DashboardLayout';
+import { Button } from './components/ui/Button';
+
+// 1. Create a dummy Dashboard page component for testing
+const DashboardHome = () => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Welcome back, John!</h1>
+        <p className="text-gray-500">Ready to analyze your code today?</p>
+      </div>
+      <Button>+ New Review</Button>
+    </div>
+    
+    {/* A placeholder card to make it look real */}
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-64 flex items-center justify-center text-gray-400">
+      Stats and Charts will go here
+    </div>
+  </div>
+);
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        {/* Redirect root "/" to "/dashboard" for now */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Dashboard Route with Layout */}
+        <Route 
+          path="/dashboard" 
+          element={
+            <DashboardLayout>
+              <DashboardHome />
+            </DashboardLayout>
+          } 
+        />
+        
+        {/* Add placeholders for other routes so links don't crash */}
+        <Route path="/upload" element={<DashboardLayout><h1>Upload Page</h1></DashboardLayout>} />
+        <Route path="/history" element={<DashboardLayout><h1>History Page</h1></DashboardLayout>} />
+        <Route path="/profile" element={<DashboardLayout><h1>Profile Page</h1></DashboardLayout>} />
+        <Route path="/settings" element={<DashboardLayout><h1>Settings Page</h1></DashboardLayout>} />
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

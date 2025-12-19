@@ -1,23 +1,38 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: "class",
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-      },
       colors: {
         primary: {
-          50: '#f0f9ff',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          900: '#0c4a6e',
+          DEFAULT: "#00C853", // The bright green from your UI
+          hover: "#009624",    // A darker green for hover states
+          light: "#B9F6CA",    // Light green for backgrounds
+        },
+        dark: {
+          900: "#121212", // Sidebar/Footer background
+          800: "#1E1E1E", // Card background (dark mode)
+          700: "#2C2C2C", // Border color
+        },
+        gray: {
+          50: "#F9FAFB", // Main app background
+          100: "#F3F4F6",
+          200: "#E5E7EB",
+          300: "#D1D5DB",
+          400: "#9CA3AF",
+          500: "#6B7280",
+          600: "#4B5563",
+          700: "#374151",
+          800: "#1F2937",
+          900: "#111827",
         }
+      },
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'], // Professional font
+        mono: ['Fira Code', 'monospace'], // For the code editor
       }
     },
   },
