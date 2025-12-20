@@ -6,7 +6,7 @@ const db = {};
 db.mongoose = mongoose;
 db.user = require("./user.model");
 db.role = require("./role.model");
-db.codeReview = require("./codeReview.model");
+db.codeReview = require("./codeReview.model.js");
 
 db.ROLES = ["user", "admin", "moderator"];
 

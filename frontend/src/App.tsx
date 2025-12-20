@@ -5,7 +5,9 @@ import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { UploadPage } from './features/code/pages/UploadPage';
 import { AnalysisResultsPage } from './features/code/pages/AnalysisResultsPage';
-// 1. Create a dummy Dashboard page component for testing
+import { HistoryPage } from './features/code/pages/HistoryPage';
+
+// Dummy Dashboard Home Component
 const DashboardHome = () => (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
@@ -16,7 +18,6 @@ const DashboardHome = () => (
       <Button>+ New Review</Button>
     </div>
     
-    {/* A placeholder card to make it look real */}
     <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-64 flex items-center justify-center text-gray-400">
       Stats and Charts will go here
     </div>
@@ -27,11 +28,14 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Redirect root "/" to "/dashboard" for now */}
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
- <Route path="/login" element={<LoginPage />} />
+        {/* Auth Routes */}
+        <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        {/* Dashboard Route with Layout */}
+
+        {/* Redirect root to dashboard */}
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+        {/* Dashboard Home */}
         <Route 
           path="/dashboard" 
           element={
@@ -40,14 +44,15 @@ function App() {
             </DashboardLayout>
           } 
         />
+
+        {/* ✅ REAL ROUTES (Duplicates removed) */}
         <Route path="/upload" element={<UploadPage />} />
-        {/* Add placeholders for other routes so links don't crash */}
-        <Route path="/upload" element={<DashboardLayout><h1>Upload Page</h1></DashboardLayout>} />
-        <Route path="/history" element={<DashboardLayout><h1>History Page</h1></DashboardLayout>} />
+        <Route path="/results" element={<AnalysisResultsPage />} />
+        <Route path="/history" element={<HistoryPage />} />
+
+        {/* Placeholders for future pages only */}
         <Route path="/profile" element={<DashboardLayout><h1>Profile Page</h1></DashboardLayout>} />
         <Route path="/settings" element={<DashboardLayout><h1>Settings Page</h1></DashboardLayout>} />
-       <Route path="/results" element={<AnalysisResultsPage />} />
-        
       </Routes>
     </BrowserRouter>
   );

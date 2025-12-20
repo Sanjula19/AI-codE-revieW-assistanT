@@ -4,9 +4,9 @@ const CodeReviewSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: false
   },
-  code: { // Renamed from codeText to match service
+  codeText:{ // Renamed from codeText to match service
     type: String,
     required: true,
     trim: true
@@ -24,6 +24,8 @@ const CodeReviewSchema = new mongoose.Schema({
     qualityScore: { type: Number, default: 0 },
     suggestions: [String],
     errors: [String],
+    correctedCode: String, // New field
+    explanation: String,   // New field
     securityIssues: { type: Number, default: 0 },
     bestPractices: { type: Boolean, default: false }
   },

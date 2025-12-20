@@ -96,3 +96,15 @@
 - **Prompt Engineering:** How to format a prompt to get structured JSON data back from an LLM.
 - **Handling API Errors:** How to debug `404 Model Not Found` errors by listing available models dynamically.
 - **Strict JSON Parsing:** How to clean up AI text responses (removing markdown backticks) to parse them into valid objects.
+
+## [`10] - Feature: History & Persistence
+**What I Built:**
+- Created a **History Page** to list past code analyses from MongoDB.
+- Connected the History list to the Results page (Clicking a history item loads the report).
+- Fixed a **Routing Conflict** in `App.tsx` where duplicate routes prevented pages from loading.
+- Made the **Results Page Crash-Proof** by adding safety checks for missing data.
+
+**New Things I Learned:**
+- **React Router Logic:** Router stops at the *first* match it finds. Duplicate routes cause unreachable pages.
+- **Strict Types:** In strict TypeScript, you must use `import type { ... }` for interfaces.
+- **Defensive Programming:** Always check `if (!data)` before trying to render it to prevent "White Screen of Death."
