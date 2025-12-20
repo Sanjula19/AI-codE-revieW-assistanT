@@ -74,3 +74,13 @@
 **New Things I Learned:**
 - **Microservices Communication:** How to make one backend service (Node) talk to another (Python) using HTTP requests.
 - **Inter-Process Debugging:** Learned that connection errors (like ECONNREFUSED) often mean a service (like Redis or Python) isn't running or reachable.
+
+## [8] - Feature: Results UI & State Management
+**What I Built:**
+- Created `AnalysisResultsPage` to visualize complex JSON data from the AI.
+- Implemented **Conditional Rendering** to show Red (Danger) or Green (Safe) UI based on the quality score.
+- Used `useLocation()` and `Maps()` to pass analysis data directly from the Upload page to the Results page without storing it in the URL.
+
+**New Things I Learned:**
+- **React Router State:** How to pass hidden data between pages using `Maps('/path', { state: data })`.
+- **Strict Types:** TypeScript requires `import type` when importing interfaces in strict mode.
