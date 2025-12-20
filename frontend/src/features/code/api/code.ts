@@ -1,8 +1,7 @@
-// src/features/code/api/code.ts
 import { api } from '../../../lib/axios';
 import type { CodeUploadRequest, AnalysisResult } from '../types/index';
 
-// ✅ FIX: This must be OUTSIDE the codeApi object
+// ✅ CRITICAL: This interface must be exported so HistoryPage can use it
 export interface HistoryItem extends AnalysisResult {
   _id: string;
   createdAt: string;
