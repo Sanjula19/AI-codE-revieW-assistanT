@@ -1,5 +1,3 @@
-// src/features/code/types/index.ts
-
 export interface CodeUploadRequest {
   codeText: string;
   language: string;
@@ -14,5 +12,8 @@ export interface AnalysisResult {
     recommendations: string[];
     securityIssues: number;
     bestPractices: boolean;
+    // ✅ ADD THESE NEW OPTIONAL FIELDS
+    correctedCode?: string;
+    explanation?: string;
   };
 }

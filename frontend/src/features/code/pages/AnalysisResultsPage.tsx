@@ -59,7 +59,30 @@ export const AnalysisResultsPage = () => {
 
         {/* Two Columns: Issues & Recommendations */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
+          {/* NEW: Learning Section */}
+        {result.aiResponse.correctedCode && (
+          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mt-6">
+            <h3 className="font-bold text-lg text-gray-900 mb-4">💡 How to Fix It</h3>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Explanation Column */}
+              <div>
+                <h4 className="font-semibold text-blue-600 mb-2">Why was the old code wrong?</h4>
+                <p className="text-gray-700 leading-relaxed bg-blue-50 p-4 rounded-lg border border-blue-100">
+                  {result.aiResponse.explanation}
+                </p>
+              </div>
+
+              {/* Code Comparison Column */}
+              <div>
+                <h4 className="font-semibold text-green-600 mb-2">✅ Corrected Version</h4>
+                <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto text-sm font-mono">
+                  <code>{result.aiResponse.correctedCode}</code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        )}
           {/* Column 1: Security Issues */}
           <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
             <div className="flex items-center gap-2 mb-4 text-red-600">

@@ -84,3 +84,15 @@
 **New Things I Learned:**
 - **React Router State:** How to pass hidden data between pages using `Maps('/path', { state: data })`.
 - **Strict Types:** TypeScript requires `import type` when importing interfaces in strict mode.
+
+## [9] - Feature: GenAI Integration (The "Senior Dev" Upgrade)
+**What I Built:**
+- Replaced the static Python "if-statements" with **Google's Gemini AI**.
+- Implemented **Prompt Engineering** to instruct the AI to act as a "Senior Security Expert."
+- Configured the Python backend to automatically detect available AI models (`gemini-pro` vs `flash`).
+- Updated the Frontend to display **Educational Content** (Corrected Code & Explanations).
+
+**New Things I Learned:**
+- **Prompt Engineering:** How to format a prompt to get structured JSON data back from an LLM.
+- **Handling API Errors:** How to debug `404 Model Not Found` errors by listing available models dynamically.
+- **Strict JSON Parsing:** How to clean up AI text responses (removing markdown backticks) to parse them into valid objects.
