@@ -13,7 +13,7 @@ const app = express();
 // Middleware
 // ====================
 app.use(cors({
-  origin: "http://localhost:3000", origin: ["http://localhost:5173", "http://localhost:3000"],
+  origin: ["http://localhost:5173", "http://localhost:3000"],
   credentials: true
 }));
 app.use(express.json());
@@ -113,9 +113,10 @@ app.get("/", (req, res) => {
 // Load Routes
 require("./src/routes/auth.routes")(app);
 require("./src/routes/user.routes")(app);
-require("./src/routes/google.routes")(app);  // Google OAuth Routes
-require("./src/routes/code.routes")(app);
-app.use("/api/v1/analysis", require("./src/routes/analysis.routes"));
+require("./src/routes/google.routes")(app);  
+
+app.use("/api/code", require("./src/routes/code.routes"));
+//app.use("/api/v1/analysis", require("./src/routes/analysis.routes"));
 // ====================
 // 404 Handler
 // ====================
