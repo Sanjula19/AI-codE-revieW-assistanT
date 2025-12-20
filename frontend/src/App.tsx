@@ -5,6 +5,7 @@ import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { UploadPage } from './features/code/pages/UploadPage';
 import { AnalysisResultsPage } from './features/code/pages/AnalysisResultsPage';
+import { HistoryPage } from './features/code/pages/HistoryPage';
 // 1. Create a dummy Dashboard page component for testing
 const DashboardHome = () => (
   <div className="space-y-6">
@@ -47,7 +48,7 @@ function App() {
         <Route path="/profile" element={<DashboardLayout><h1>Profile Page</h1></DashboardLayout>} />
         <Route path="/settings" element={<DashboardLayout><h1>Settings Page</h1></DashboardLayout>} />
        <Route path="/results" element={<AnalysisResultsPage />} />
-        
+        <Route path="/history" element={<HistoryPage />} />
       </Routes>
     </BrowserRouter>
   );

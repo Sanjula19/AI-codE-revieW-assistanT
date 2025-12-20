@@ -1,11 +1,22 @@
+// src/features/code/api/code.ts
 import { api } from '../../../lib/axios';
-// ✅ FIX: Added the word 'type' after import
 import type { CodeUploadRequest, AnalysisResult } from '../types/index';
+
+// ✅ FIX: This must be OUTSIDE the codeApi object
+export interface HistoryItem extends AnalysisResult {
+  _id: string;
+  createdAt: string;
+  language: string;
+}
 
 export const codeApi = {
   analyze: async (data: CodeUploadRequest): Promise<AnalysisResult> => {
-    // We send the code to /code/upload
     const response = await api.post('/code/upload', data);
+    return response.data;
+  },
+
+  getHistory: async (): Promise<HistoryItem[]> => {
+    const response = await api.get('/code/history');
     return response.data;
   }
 };
