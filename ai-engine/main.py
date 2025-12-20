@@ -1,81 +1,99 @@
 # ai-engine/main.py
+import os
+import json
+import uvicorn
+import google.generativeai as genai
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from typing import List
-import uvicorn
+from typing import List, Optional
 
-app = FastAPI(
-    title="CodeGuard AI Engine",
-    description="Real-time code quality & security analysis",
-    version="1.0"
-)
+# --- CONFIGURATION ---
+# 1. PASTE YOUR API KEY HERE
+os.environ["GEMINI_API_KEY"] = "YOUR_API_KEY_HERE" 
+genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
+# Setup the Model
+model = genai.GenerativeModel('gemini-1.5-flash') # Fast & Efficient model
+
+app = FastAPI(title="CodeGuard AI - Advanced", version="2.0")
+
+# --- DATA MODELS ---
 class CodeRequest(BaseModel):
     code: str
-    language: str = "javascript"  # optional
+    language: str = "javascript"
 
 class AIResponse(BaseModel):
     qualityScore: int
     issues: List[str]
     recommendations: List[str]
+    correctedCode: Optional[str] = None
+    explanation: Optional[str] = None
     securityIssues: int = 0
-    bestPractices: bool = False
 
-def analyze_code(code: str, language: str):
-    lines = len(code.splitlines())
-    score = 100
-    issues = []
-    recommendations = []
+# --- THE AI PROMPT ---
+def analyze_with_llm(code: str, language: str):
+    # This prompt tells the AI exactly how to behave
+    prompt = f"""
+    Act as a Senior Software Engineer and Security Expert. 
+    Review the following {language} code.
+    
+    Your goal is to teach the user how to write better code.
+    
+    1. Identify critical security risks (XSS, Injection, etc.).
+    2. Identify code quality issues (variables, complexity).
+    3. PROVIDE A CORRECTED VERSION of the code that fixes these issues.
+    4. EXPLAIN WHY the old code was bad and why your fix is better.
+    5. Rate the original code from 0 to 100.
 
-    # Real heuristic rules (this is smart dummy AI)
-    if "eval(" in code:
-        issues.append("CRITICAL: eval() detected — Remote Code Execution Risk")
-        recommendations.append("Never use eval(). Use JSON.parse or safe alternatives.")
-        score -= 50
-    if "alert(" in code or "document.write(" in code:
-        issues.append("Potential XSS vulnerability")
-        recommendations.append("Sanitize all user inputs. Avoid direct DOM writes.")
-        score -= 30
-    if language == "javascript" and "var " in code:
-        issues.append("Outdated 'var' keyword")
-        recommendations.append("Use 'let' or 'const' for better scoping")
-        score -= 10
-    if "console.log" in code:
-        issues.append("Debug statement in production code")
-        recommendations.append("Remove console.log before deploy")
-        score -= 5
-    if lines > 100:
-        issues.append("File too long (>100 lines)")
-        recommendations.append("Split into smaller, focused modules")
-        score -= 15
-    if "password" in code.lower() and "=" in code:
-        issues.append("Hardcoded credential detected")
-        recommendations.append("Use environment variables or secret manager")
-        score -= 40
+    Return the response in strictly valid JSON format like this:
+    {{
+        "qualityScore": 85,
+        "issues": ["List of short error names"],
+        "recommendations": ["List of specific advice"],
+        "correctedCode": "The full fixed code block here",
+        "explanation": "A short paragraph explaining the improvements and teaching the user."
+    }}
 
-    if not issues:
-        issues = ["No issues found!"]
-        recommendations = ["Excellent code! Keep it up."]
+    Here is the Code to Review:
+    ```
+    {code}
+    ```
+    """
 
-    return {
-        "qualityScore": max(10, score),
-        "issues": issues,
-        "recommendations": recommendations,
-        "securityIssues": sum(1 for i in issues if "CRITICAL" in i or "XSS" in i or "password" in i.lower()),
-        "bestPractices": score >= 85
-    }
+    try:
+        response = model.generate_content(prompt)
+        # Clean up response to ensure it's pure JSON
+        cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
+        data = json.loads(cleaned_text)
+        
+        # Add a safety count for security issues
+        data["securityIssues"] = len([i for i in data.get("issues", []) if "Security" in i or "Risk" in i or "Critical" in i])
+        
+        return data
+    except Exception as e:
+        print(f"AI Error: {e}")
+        # Fallback if AI fails
+        return {
+            "qualityScore": 0,
+            "issues": ["AI Analysis Failed"],
+            "recommendations": ["Please try again."],
+            "correctedCode": "",
+            "explanation": "Could not connect to AI Engine.",
+            "securityIssues": 0
+        }
 
+# --- ROUTES ---
 @app.post("/analyze", response_model=AIResponse)
 async def analyze_code_endpoint(request: CodeRequest):
     if not request.code.strip():
         raise HTTPException(status_code=400, detail="Code is required")
     
-    result = analyze_code(request.code, request.language)
-    return result
+    # Call the smart AI
+    return analyze_with_llm(request.code, request.language)
 
 @app.get("/")
 def health():
-    return {"status": "AI Engine Running", "ready": True}
+    return {"status": "AI Smart Engine Running"}
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8080, reload=True)
