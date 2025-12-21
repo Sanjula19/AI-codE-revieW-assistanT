@@ -108,3 +108,14 @@
 - **React Router Logic:** Router stops at the *first* match it finds. Duplicate routes cause unreachable pages.
 - **Strict Types:** In strict TypeScript, you must use `import type { ... }` for interfaces.
 - **Defensive Programming:** Always check `if (!data)` before trying to render it to prevent "White Screen of Death."
+
+## [11]2025/12/21 - Feature: Real-Time Dashboard
+**What I Built:**
+- Created a **Stats API** in the backend using MongoDB Aggregation (`$group`, `$avg`, `$sum`) to calculate total reviews and average scores.
+- Built a **Dashboard Page** that fetches these stats and displays them in dynamic cards.
+- Integrated the Dashboard into the main routing system, replacing the dummy placeholder.
+
+**New Things I Learned:**
+- **MongoDB Aggregation:** How to use `.aggregate()` to perform calculations directly in the database (much faster than looping in JavaScript).
+- **Dashboard UX:** The importance of showing "At-a-glance" metrics to give users immediate value when they log in.
+- **Frontend-Backend Sync:** How to keep TypeScript interfaces (`DashboardStats`) in sync with the JSON response from the API.

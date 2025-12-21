@@ -6,7 +6,7 @@ import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { UploadPage } from './features/code/pages/UploadPage';
 import { AnalysisResultsPage } from './features/code/pages/AnalysisResultsPage';
 import { HistoryPage } from './features/code/pages/HistoryPage';
-
+import { DashboardPage } from './features/dashboard/pages/DashboardPage';
 // Dummy Dashboard Home Component
 const DashboardHome = () => (
   <div className="space-y-6">
@@ -35,13 +35,12 @@ function App() {
         {/* Redirect root to dashboard */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 
-        {/* Dashboard Home */}
+      {/* Dashboard Home */}
         <Route 
           path="/dashboard" 
           element={
-            <DashboardLayout>
-              <DashboardHome />
-            </DashboardLayout>
+            
+            <DashboardPage />
           } 
         />
 

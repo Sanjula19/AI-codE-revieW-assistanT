@@ -1,11 +1,18 @@
 import { api } from '../../../lib/axios';
 import type { CodeUploadRequest, AnalysisResult } from '../types/index';
 
-// ✅ CRITICAL: This interface must be exported so HistoryPage can use it
 export interface HistoryItem extends AnalysisResult {
   _id: string;
   createdAt: string;
   language: string;
+}
+
+// ✅ NEW: Interface for Dashboard Stats
+export interface DashboardStats {
+  totalScans: number;
+  averageScore: number;
+  totalIssues: number;
+  recentActivity: HistoryItem[];
 }
 
 export const codeApi = {
@@ -16,6 +23,12 @@ export const codeApi = {
 
   getHistory: async (): Promise<HistoryItem[]> => {
     const response = await api.get('/code/history');
+    return response.data;
+  },
+
+  // ✅ NEW: Get Stats
+  getStats: async (): Promise<DashboardStats> => {
+    const response = await api.get('/code/stats');
     return response.data;
   }
 };
