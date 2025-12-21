@@ -114,7 +114,7 @@ app.get("/", (req, res) => {
 require("./src/routes/auth.routes")(app);
 require("./src/routes/user.routes")(app);
 require("./src/routes/google.routes")(app);  
-
+require("./src/routes/google.routes")(app);
 app.use("/api/code", require("./src/routes/code.routes"));
 //app.use("/api/v1/analysis", require("./src/routes/analysis.routes"));
 // ====================

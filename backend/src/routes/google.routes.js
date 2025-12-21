@@ -45,7 +45,7 @@ app.get('/api/auth/google/callback',
       };
 
       const queryString = new URLSearchParams(tokenData).toString();
-      res.redirect(`http://localhost:3000/auth/success?${queryString}`);
+     res.redirect(`http://localhost:5173/login?token=${accessToken}`);
     } catch (err) {
       console.error('Google OAuth Callback Error:', err.message, err.stack);  // Add this for full stack trace
       res.status(500).json({ message: "Something went wrong!" });

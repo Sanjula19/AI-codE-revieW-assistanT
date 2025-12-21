@@ -1,33 +1,23 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { DashboardLayout } from './components/layout/DashboardLayout';
-import { Button } from './components/ui/Button';
+
 import { LoginPage } from './features/auth/pages/LoginPage';
 import { RegisterPage } from './features/auth/pages/RegisterPage';
 import { UploadPage } from './features/code/pages/UploadPage';
 import { AnalysisResultsPage } from './features/code/pages/AnalysisResultsPage';
 import { HistoryPage } from './features/code/pages/HistoryPage';
 import { DashboardPage } from './features/dashboard/pages/DashboardPage';
-// Dummy Dashboard Home Component
-const DashboardHome = () => (
-  <div className="space-y-6">
-    <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Welcome back, John!</h1>
-        <p className="text-gray-500">Ready to analyze your code today?</p>
-      </div>
-      <Button>+ New Review</Button>
-    </div>
-    
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 h-64 flex items-center justify-center text-gray-400">
-      Stats and Charts will go here
-    </div>
-  </div>
-);
+import { ProfilePage } from './features/user/pages/ProfilePage';
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
+
+         {/* User Profile */}
+        <Route path="/profile" element={<ProfilePage />} />
+
         {/* Auth Routes */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -39,7 +29,6 @@ function App() {
         <Route 
           path="/dashboard" 
           element={
-            
             <DashboardPage />
           } 
         />

@@ -1,134 +1,171 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AuthLayout } from '../../../components/layout/AuthLayout';
-import { Input } from '../../../components/ui/Input';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../../../components/ui/Button';
-import { useAuth } from '../../../hooks/useAuth'; // Import the hook
+import { authApi } from '../api/auth';
+import { Mail, Lock, AlertCircle, ArrowRight, Loader } from 'lucide-react';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
-  const { login, isLoading } = useAuth(); // Get the login function
+  const [searchParams] = useSearchParams();
   
-  // State to store what user types
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  // Handle typing
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData(prev => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
+  // ✅ NEW: Check for Google Token when page loads
+  useEffect(() => {
+    const token = searchParams.get('token');
+    const errorMsg = searchParams.get('error');
 
-  // Handle Submit
+    if (token) {
+      // 1. Save the token coming from Google
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify({ username: "Google User" })); // Temporary placeholder
+      
+      // 2. Redirect to Dashboard
+      navigate('/dashboard');
+    }
+
+    if (errorMsg) {
+      setError("Google Login Failed: " + errorMsg);
+    }
+  }, [searchParams, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); // Stop page from refreshing
+    e.preventDefault();
     setError('');
+    setLoading(true);
 
     try {
-      // Call the backend
-      // Note: We map 'email' to 'username' because your backend expects 'username'
-      await login({ 
-        username: formData.email, // using email as username for now? Check your backend! 
-        password: formData.password 
-      });
-      
-      // If successful, go to Dashboard
+      const response = await authApi.login(formData);
+      localStorage.setItem('token', response.accessToken);
+      localStorage.setItem('user', JSON.stringify(response));
       navigate('/dashboard');
     } catch (err: any) {
-      console.error(err);
-      setError('Invalid email or password');
+      setError(err.response?.data?.message || 'Invalid credentials');
+    } finally {
+      setLoading(false);
     }
   };
 
+ // ✅ FIX: Use the port your Node.js backend is running on (e.g., 5000)
+  // Do NOT use 8080 (that is the Python AI)
+  const handleGoogleLogin = () => {
+    window.location.href = "http://localhost:5000/api/auth/google"; 
+  };
+
   return (
-    <AuthLayout 
-      title="Welcome back" 
-      subtitle="Sign in to your account to continue"
-    >
-      <form className="space-y-6" onSubmit={handleSubmit}>
-        
-        {/* Show Error Message if login fails */}
-        {error && (
-          <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
-            {error}
-          </div>
-        )}
-
-        <Input 
-          label="Username"  // Changed from Email to Username to match your backend
-          name="email"      // (Keep name as 'email' or 'username' depending on preference)
-          value={formData.email}
-          onChange={handleChange}
-          type="text" 
-          placeholder="Your username"
-          required
-        />
-
-        <Input 
-          label="Password" 
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          type="password" 
-          placeholder="••••••••" 
-          required
-        />
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center">
-            <input
-              id="remember-me"
-              name="remember-me"
-              type="checkbox"
-              className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-            />
-            <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900">
-              Remember me
-            </label>
-          </div>
-
-          <div className="text-sm">
-            <Link to="/forgot-password" className="font-medium text-primary hover:text-primary-hover">
-              Forgot your password?
-            </Link>
-          </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="flex justify-center">
+           {/* You can replace this with your logo */}
+           <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
+             CG
+           </div>
         </div>
+        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Sign in to your account
+        </h2>
+        <p className="mt-2 text-center text-sm text-gray-600">
+          Or{' '}
+          <Link to="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            create a new account
+          </Link>
+        </p>
+      </div>
 
-        <Button 
-          className="w-full" 
-          type="submit" 
-          isLoading={isLoading} // Show spinner while loading
-        >
-          Sign in
-        </Button>
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+          
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </div>
+          )}
 
-        {/* ... (Keep the Google button and Sign Up link) ... */}
-         <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-300" />
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Username</label>
+              <div className="mt-1 relative">
+                <input
+                  type="text"
+                  required
+                  value={formData.username}
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Password</label>
+              <div className="mt-1 relative">
+                <input
+                  type="password"
+                  required
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                />
+                <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <Button type="submit" className="w-full flex justify-center" disabled={loading}>
+                {loading ? <Loader className="w-5 h-5 animate-spin" /> : "Sign in"}
+                {!loading && <ArrowRight className="ml-2 w-4 h-4" />}
+              </Button>
+            </div>
+          </form>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+              </div>
+            </div>
+
+            <div className="mt-6">
+              {/* ✅ NEW: Google Button */}
+              <button
+                onClick={handleGoogleLogin}
+                className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
+              >
+                <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24">
+                  <path
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+                    fill="#4285F4"
+                  />
+                  <path
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                    fill="#34A853"
+                  />
+                  <path
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.84z"
+                    fill="#FBBC05"
+                  />
+                  <path
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                    fill="#EA4335"
+                  />
+                </svg>
+                Sign in with Google
+              </button>
+            </div>
           </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-gray-500">Or continue with</span>
-          </div>
+
         </div>
-
-        <Button variant="outline" type="button" className="w-full">
-           {/* ... svg icons ... */}
-           Google
-        </Button>
-      </form>
-
-      <p className="mt-6 text-center text-sm text-gray-600">
-        Don't have an account?{' '}
-        <Link to="/register" className="font-medium text-primary hover:text-primary-hover">
-          Sign up
-        </Link>
-      </p>
-    </AuthLayout>
+      </div>
+    </div>
   );
 };

@@ -65,3 +65,44 @@ exports.getHistory = async (req, res) => {
     res.status(500).json({ message: "Failed to fetch history" });
   }
 };
+
+// ... existing code ...
+
+exports.getDashboardStats = async (req, res) => {
+  try {
+    // 1. Get Total Scans (Count all documents)
+    const totalScans = await CodeReview.countDocuments();
+
+    // 2. Calculate Average Score (Only for completed reviews)
+    const avgResult = await CodeReview.aggregate([
+      { $match: { "aiResponse.qualityScore": { $exists: true } } }, // ✅ Filter out bad data
+      { $group: { _id: null, avgScore: { $avg: "$aiResponse.qualityScore" } } }
+    ]);
+    const averageScore = avgResult.length > 0 ? Math.round(avgResult[0].avgScore) : 0;
+
+    // 3. Count Total Issues (Safely handling missing arrays)
+    const issuesResult = await CodeReview.aggregate([
+      { $match: { "aiResponse.issues": { $exists: true, $type: "array" } } }, // ✅ Filter out bad data
+      { $project: { issueCount: { $size: "$aiResponse.issues" } } },
+      { $group: { _id: null, totalIssues: { $sum: "$issueCount" } } }
+    ]);
+    const totalIssues = issuesResult.length > 0 ? issuesResult[0].totalIssues : 0;
+
+    // 4. Get Recent Activity (Safely)
+    const recentActivity = await CodeReview.find({ "aiResponse": { $exists: true } }) // ✅ Only valid reviews
+      .sort({ createdAt: -1 })
+      .limit(3)
+      .select('language createdAt aiResponse.qualityScore');
+
+    res.status(200).json({
+      totalScans,
+      averageScore,
+      totalIssues,
+      recentActivity
+    });
+
+  } catch (error) {
+    console.error("Stats Error:", error);
+    res.status(500).json({ message: "Failed to calculate stats" });
+  }
+};
