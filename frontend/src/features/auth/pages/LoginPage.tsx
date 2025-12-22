@@ -12,24 +12,27 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ✅ NEW: Check for Google Token when page loads
+  // ✅ UPDATED: Fix for "Old Profile" Issue
   useEffect(() => {
     const token = searchParams.get('token');
     const errorMsg = searchParams.get('error');
 
     if (token) {
-      // 1. Save the token coming from Google
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify({ username: "Google User" })); // Temporary placeholder
+      // 1. CRITICAL: Clear any old user data first!
+      localStorage.clear(); 
       
-      // 2. Redirect to Dashboard
-      navigate('/dashboard');
+      // 2. Save the new token
+      localStorage.setItem('token', token);
+      
+      // 3. Force a full page reload to ensure Axios picks up the new token
+      // (Do not use navigate('/dashboard') here)
+      window.location.href = '/dashboard';
     }
 
     if (errorMsg) {
-      setError("Google Login Failed: " + errorMsg);
+      setError("Google Login Failed: " + decodeURIComponent(errorMsg));
     }
-  }, [searchParams, navigate]);
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,31 +43,26 @@ export const LoginPage = () => {
       const response = await authApi.login(formData);
       localStorage.setItem('token', response.accessToken);
       localStorage.setItem('user', JSON.stringify(response));
-      navigate('/dashboard');
+      // Force reload here too for consistency
+      window.location.href = '/dashboard';
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials');
+      const msg = err.response?.data?.message || 'Invalid credentials';
+      setError(msg);
     } finally {
       setLoading(false);
     }
   };
 
- // ✅ FIX: Use the port your Node.js backend is running on (e.g., 5000)
-  // Do NOT use 8080 (that is the Python AI)
   const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:5000/api/auth/google"; 
+    // Ensure this points to your Node Backend (Port 5000)
+    window.location.href = "http://localhost:5000/api/auth/google";
   };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="flex justify-center">
-           {/* You can replace this with your logo */}
-           <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl">
-             CG
-           </div>
-        </div>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
+          Sign in to CodeGuard
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Or{' '}
@@ -136,7 +134,6 @@ export const LoginPage = () => {
             </div>
 
             <div className="mt-6">
-              {/* ✅ NEW: Google Button */}
               <button
                 onClick={handleGoogleLogin}
                 className="w-full inline-flex justify-center py-2.5 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 transition-colors"
@@ -163,7 +160,6 @@ export const LoginPage = () => {
               </button>
             </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
-import { api } from '../../../lib/axios';
+import axios from 'axios';
 
+// 1. THIS WAS MISSING BEFORE - The interface definition
 export interface UserProfile {
   id: string;
   username: string;
@@ -8,22 +9,29 @@ export interface UserProfile {
   createdAt: string;
 }
 
-export interface UpdateProfileRequest {
-  username?: string;
-  email?: string;
-  // password?: string; // Future feature
-}
+// 2. Create the API instance
+const api = axios.create({
+  baseURL: 'http://localhost:5000/api', 
+});
 
+// 3. The Interceptor: This automatically adds the token to requests
+api.interceptors.request.use((config) => {
+  // Try both common names just to be safe
+  const token = localStorage.getItem('authToken') || localStorage.getItem('token');
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// 4. Export the API methods
 export const userApi = {
-  // Get current user profile
-  getProfile: async (): Promise<UserProfile> => {
-    const response = await api.get('/user/profile');
+  getProfile: async () => {
+    const response = await api.get<UserProfile>('/user/profile');
     return response.data;
   },
-
-  // Update profile
-  updateProfile: async (data: UpdateProfileRequest): Promise<{ message: string, user: UserProfile }> => {
-    const response = await api.put('/user/profile', data);
+  updateProfile: async (data: { username: string; email: string }) => {
+    const response = await api.put<{ user: UserProfile }>('/user/profile', data);
     return response.data;
   }
 };

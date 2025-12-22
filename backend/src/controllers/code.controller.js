@@ -53,16 +53,18 @@ exports.uploadCode = async (req, res) => {
 };
 
 // Add this to the existing exports
+// ✅ CORRECT: Finds ONLY specific user's history
 exports.getHistory = async (req, res) => {
   try {
-    // For now, we fetch ALL reviews (later we filter by req.userId)
-    // .sort({ createdAt: -1 }) means "Newest First"
-    const history = await CodeReview.find().sort({ createdAt: -1 }).limit(20);
+    // 1. We assume your Auth middleware adds 'req.user'
+    const userId = req.user.id; // or req.user._id
+
+    // 2. Filter: { user: userId } (Check if your DB uses 'user' or 'userId')
+    const history = await Analysis.find({ user: userId }).sort({ createdAt: -1 });
     
-    res.status(200).json(history);
-  } catch (error) {
-    console.error("History Error:", error);
-    res.status(500).json({ message: "Failed to fetch history" });
+    res.json(history);
+  } catch (err) {
+    res.status(500).json({ message: 'Server Error' });
   }
 };
 
@@ -71,7 +73,7 @@ exports.getHistory = async (req, res) => {
 exports.getDashboardStats = async (req, res) => {
   try {
     // 1. Get Total Scans (Count all documents)
-    const totalScans = await CodeReview.countDocuments();
+   const totalScans = await Analysis.countDocuments({ user: userId });
 
     // 2. Calculate Average Score (Only for completed reviews)
     const avgResult = await CodeReview.aggregate([
