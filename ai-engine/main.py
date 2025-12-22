@@ -9,7 +9,6 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 from datetime import datetime
 
-# --- 1. LOAD SECRETS ---
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
@@ -18,33 +17,41 @@ if not api_key:
 else:
     genai.configure(api_key=api_key)
 
-# --- 2. MONGODB CONNECTION ---
-# ⚠️ ERROR 10061 FIX: Ensure MongoDB is running in a separate terminal!
+# --- MONGODB CONNECTION ---
+# Added missing connection setup so the DB parts work
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017")
 client = AsyncIOMotorClient(MONGO_URL)
 db = client.codeguard_db
 collection = db.reviews
 
-app = FastAPI(title="CodeGuard AI - Flash", version="2.3")
+app = FastAPI(title="CodeGuard AI - Advanced", version="2.1")
 
-# --- 3. MODEL SETUP (FIXED: Forces Flash) ---
+# Global variable to store the working model
 active_model = None
 
+# --- AUTOMATIC MODEL FINDER ---
 def get_working_model():
-    print("🔍 Configuring AI Model...")
+    """Finds the first available model that supports content generation."""
+    print("🔍 Searching for available AI models...")
     try:
-        # STRICTLY use Gemini 1.5 Flash as requested
-        model_name = "gemini-1.5-flash" 
-        model = genai.GenerativeModel(model_name)
-        print(f"✅ SUCCESS: Connected to {model_name}")
-        return model
+        for m in genai.list_models():
+            if 'generateContent' in m.supported_generation_methods:
+                print(f"✅ Found Model: {m.name}")
+                # Prefer flash or pro if available, otherwise take the first one
+                if "flash" in m.name or "pro" in m.name:
+                    return genai.GenerativeModel(m.name)
+        
+        # If loop finishes, just try a safe default
+        print("⚠️ No specific match found, trying 'gemini-pro'...")
+        return genai.GenerativeModel('gemini-pro')
     except Exception as e:
-        print(f"❌ Error setting up {model_name}: {e}")
+        print(f"❌ Error listing models: {e}")
         return None
 
+# Initialize the model on startup
 active_model = get_working_model()
 
-# --- 4. DATA MODELS ---
+# --- DATA MODELS ---
 class CodeRequest(BaseModel):
     code: str
     language: str = "javascript"
@@ -56,26 +63,24 @@ class AIResponse(BaseModel):
     correctedCode: Optional[str] = None
     explanation: Optional[str] = None
     securityIssues: int = 0
-    timestamp: Optional[str] = None
+    timestamp: Optional[str] = None # Added for type safety
 
-def fix_mongo_id(document):
-    if document:
-        document["id"] = str(document["_id"])
-        del document["_id"]
-    return document
-
-# --- 5. AI LOGIC ---
-async def analyze_with_llm_logic(code: str, language: str):
+# --- THE AI PROMPT ---
+# FIXED: Changed to 'async def' so it can be awaited
+async def analyze_with_llm(code: str, language: str):
     if not active_model:
         return {
-            "qualityScore": 0, 
-            "issues": ["AI Model Error"], 
-            "recommendations": ["Check API Key"], 
-            "securityIssues": 0
+            "qualityScore": 0,
+            "issues": ["AI Configuration Error"],
+            "explanation": "Could not initialize a valid AI model at startup. Check terminal logs.",
+            "securityIssues": 0,
+            "recommendations": [],
+            "correctedCode": ""
         }
 
     prompt = f"""
     Act as a Senior Software Engineer. Review this {language} code.
+    
     1. Identify critical security risks.
     2. Identify code quality issues.
     3. PROVIDE A CORRECTED VERSION.
@@ -85,10 +90,10 @@ async def analyze_with_llm_logic(code: str, language: str):
     Return STRICT JSON:
     {{
         "qualityScore": 85,
-        "issues": ["Issue 1"],
-        "recommendations": ["Fix 1"],
-        "correctedCode": "// Fixed code",
-        "explanation": "Explanation here"
+        "issues": ["Short error names"],
+        "recommendations": ["Specific advice"],
+        "correctedCode": "The fixed code",
+        "explanation": "Short teaching explanation."
     }}
 
     Code:
@@ -99,28 +104,24 @@ async def analyze_with_llm_logic(code: str, language: str):
 
     try:
         response = active_model.generate_content(prompt)
-        text_response = response.text.strip()
+        print("🔍 RAW AI RESPONSE:", response.text) # Debug log
+
+        cleaned_text = response.text.replace("```json", "").replace("```", "").strip()
+        data = json.loads(cleaned_text)
         
-        # Cleanup JSON
-        if text_response.startswith("```json"):
-            text_response = text_response[7:]
-        if text_response.endswith("```"):
-            text_response = text_response[:-3]
-            
-        data = json.loads(text_response)
-        data["securityIssues"] = len([i for i in data.get("issues", []) if "Security" in i or "Risk" in i])
+        data["securityIssues"] = len([i for i in data.get("issues", []) if "Security" in i or "Risk" in i or "Critical" in i])
         return data
 
     except Exception as e:
-        print(f"❌ AI Analysis Error: {e}")
+        print(f"❌ AI Error: {e}")
         return {
             "qualityScore": 0,
-            "issues": ["Analysis Failed"],
-            "recommendations": ["Try again"],
+            "issues": ["AI Analysis Failed"],
+            "recommendations": ["Check Python Terminal for error details."],
+            "correctedCode": "",
+            "explanation": f"System Error: {str(e)}",
             "securityIssues": 0
         }
-
-# --- 6. ENDPOINTS ---
 
 @app.post("/analyze", response_model=AIResponse)
 async def analyze_code_endpoint(request: CodeRequest):
@@ -128,7 +129,8 @@ async def analyze_code_endpoint(request: CodeRequest):
         raise HTTPException(status_code=400, detail="Code is required")
     
     # 1. Analyze
-    result = await analyze_with_llm_logic(request.code, request.language)
+    # FIXED: Function name corrected (was analyze_with_llm_logic)
+    result = await analyze_with_llm(request.code, request.language)
     
     # 2. Add Time
     result["timestamp"] = datetime.utcnow().isoformat()
@@ -136,13 +138,21 @@ async def analyze_code_endpoint(request: CodeRequest):
     
     # 3. Save to DB
     try:
-        await collection.insert_one(result)
+        # Added helper to remove _id before returning, just in case
+        await collection.insert_one(result.copy())
         print("💾 Saved to MongoDB successfully")
     except Exception as e:
         print(f"⚠️ DATABASE ERROR: {e}") 
         # We print but don't crash, so the user still sees the result on the main page
 
     return result
+
+# Helper to fix Mongo ID
+def fix_mongo_id(document):
+    if document:
+        document["id"] = str(document["_id"])
+        del document["_id"]
+    return document
 
 @app.get("/history")
 async def get_history():
@@ -167,7 +177,7 @@ async def get_dashboard_stats():
         return {
             "totalScans": total_scans,
             "averageScore": avg_score,
-            "activeModel": "Gemini 1.5 Flash"
+            "activeModel": "Gemini Flash"
         }
     except Exception as e:
         return {"totalScans": 0, "averageScore": 0, "error": str(e)}
