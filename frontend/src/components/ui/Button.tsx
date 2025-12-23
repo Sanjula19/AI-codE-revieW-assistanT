@@ -1,6 +1,5 @@
 import React from "react";
 
-// Types: What options can we pass to this button?
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "outline" | "danger";
   size?: "sm" | "md" | "lg";
@@ -15,10 +14,9 @@ export const Button = ({
   className = "",
   ...props
 }: ButtonProps) => {
-  
+ 
   // 1. Base styles (always applied)
   const baseStyles = "inline-flex items-center justify-center font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none rounded-lg";
-
   // 2. Variants (Colors)
   const variants = {
     primary: "bg-primary text-white hover:bg-primary-hover focus:ring-primary",
@@ -26,14 +24,12 @@ export const Button = ({
     outline: "border border-gray-300 bg-transparent hover:bg-gray-50 text-gray-700",
     danger: "bg-red-600 text-white hover:bg-red-700 focus:ring-red-500",
   };
-
   // 3. Sizes (Padding & Text size)
   const sizes = {
     sm: "h-8 px-3 text-sm",
     md: "h-10 px-4 text-base",
     lg: "h-12 px-6 text-lg",
   };
-
   return (
     <button
       className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${className}`}

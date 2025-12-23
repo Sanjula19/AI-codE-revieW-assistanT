@@ -7,7 +7,7 @@ import { Mail, Lock, AlertCircle, ArrowRight, Loader } from 'lucide-react';
 export const LoginPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
+ 
   const [formData, setFormData] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,19 +16,17 @@ export const LoginPage = () => {
   useEffect(() => {
     const token = searchParams.get('token');
     const errorMsg = searchParams.get('error');
-
     if (token) {
       // 1. CRITICAL: Clear any old user data first!
-      localStorage.clear(); 
-      
-      // 2. Save the new token
-      localStorage.setItem('token', token);
-      
+      localStorage.clear();
+     
+      // FIXED: Use consistent 'accessToken' key (assuming Google returns accessToken; adjust if it's different)
+      localStorage.setItem('accessToken', token);
+     
       // 3. Force a full page reload to ensure Axios picks up the new token
       // (Do not use navigate('/dashboard') here)
       window.location.href = '/dashboard';
     }
-
     if (errorMsg) {
       setError("Google Login Failed: " + decodeURIComponent(errorMsg));
     }
@@ -38,18 +36,25 @@ export const LoginPage = () => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
     try {
       const response = await authApi.login(formData);
-      localStorage.setItem('token', response.accessToken);
-      localStorage.setItem('user', JSON.stringify(response));
+      // FIXED: Use consistent 'accessToken' and 'refreshToken' keys; remove unnecessary 'user' storage (AuthProvider handles profile)
+      localStorage.setItem('accessToken', response.accessToken);
+      localStorage.setItem('refreshToken', response.refreshToken);
       // Force reload here too for consistency
       window.location.href = '/dashboard';
-    } catch (err: any) {
-      const msg = err.response?.data?.message || 'Invalid credentials';
+    } 
+   catch (err: unknown) {
+      let msg = 'Invalid credentials';
+      if (err instanceof Error) {
+        msg = err.message;
+      } else if (err && typeof err === 'object' && 'response' in err) {
+        // Safe type assertion for Axios-like error
+        msg = (err as any).response?.data?.message || msg;
+      }
       setError(msg);
     } finally {
-      setLoading(false);
+      setLoading(false); // You forgot to reset loading on error!
     }
   };
 
@@ -71,17 +76,15 @@ export const LoginPage = () => {
           </Link>
         </p>
       </div>
-
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          
+         
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm flex items-center gap-2">
               <AlertCircle className="w-4 h-4" />
               {error}
             </div>
           )}
-
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label className="block text-sm font-medium text-gray-700">Username</label>
@@ -98,7 +101,6 @@ export const LoginPage = () => {
                 </div>
               </div>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-700">Password</label>
               <div className="mt-1 relative">
@@ -114,7 +116,6 @@ export const LoginPage = () => {
                 </div>
               </div>
             </div>
-
             <div>
               <Button type="submit" className="w-full flex justify-center" disabled={loading}>
                 {loading ? <Loader className="w-5 h-5 animate-spin" /> : "Sign in"}
@@ -122,7 +123,6 @@ export const LoginPage = () => {
               </Button>
             </div>
           </form>
-
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -132,7 +132,6 @@ export const LoginPage = () => {
                 <span className="px-2 bg-white text-gray-500">Or continue with</span>
               </div>
             </div>
-
             <div className="mt-6">
               <button
                 onClick={handleGoogleLogin}

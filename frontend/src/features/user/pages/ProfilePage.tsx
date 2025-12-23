@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { DashboardLayout } from '../../../components/layout/DashboardLayout';
-import { userApi, type UserProfile } from '../api/user'; 
+import { userApi, type UserProfile } from '../api/user';
 import { Button } from '../../../components/ui/Button';
-import { User, Mail, Calendar, Save, X, Edit2 } from 'lucide-react';
+import { User, Mail, Calendar, Edit2 } from 'lucide-react';
 
 export const ProfilePage = () => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
-  
+ 
   // Form State
   const [formData, setFormData] = useState({ username: '', email: '' });
 
@@ -35,18 +35,24 @@ export const ProfilePage = () => {
     try {
       const res = await userApi.updateProfile(formData);
       // Handle response structure differences
-      const updatedUser = (res as any).user || res; 
-      setProfile(updatedUser); 
+      const updatedUser = (res as any).user || res;
+      setProfile(updatedUser);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setIsEditing(false);
-    } catch (err: any) {
-       const errorMsg = err.response?.data?.message || 'Failed to update';
-       setMessage({ type: 'error', text: errorMsg });
-    }
+    } catch (err: unknown) {
+  let errorMsg = 'Failed to update';
+  if (err instanceof Error) {
+    errorMsg = err.message;
+  } else if (err && typeof err === 'object' && 'response' in err) {
+
+    errorMsg = (err as any).response?.data?.message || errorMsg;
+  }
+  setMessage({ type: 'error', text: errorMsg });
+}
   };
 
   if (loading) return <DashboardLayout>Loading Profile...</DashboardLayout>;
-  
+ 
   // If profile is null, show a helpful message instead of crashing
   if (!profile) return (
       <DashboardLayout>
@@ -64,13 +70,11 @@ export const ProfilePage = () => {
     <DashboardLayout>
       <div className="max-w-2xl mx-auto space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">My Profile</h1>
-
         {message && (
           <div className={`p-4 rounded-lg text-sm ${message.type === 'success' ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
             {message.text}
           </div>
         )}
-
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 h-32 relative">
              <div className="absolute -bottom-10 left-8">
@@ -81,7 +85,6 @@ export const ProfilePage = () => {
                </div>
              </div>
           </div>
-
           <div className="pt-12 pb-8 px-8">
             <div className="flex justify-between items-start mb-6">
               <div>
@@ -96,7 +99,6 @@ export const ProfilePage = () => {
                 </Button>
               )}
             </div>
-
             {!isEditing ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-gray-700 p-3 bg-gray-50 rounded-lg">

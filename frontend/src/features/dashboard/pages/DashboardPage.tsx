@@ -15,6 +15,8 @@ export const DashboardPage = () => {
       try {
         const data = await codeApi.getStats();
         setStats(data);
+        // FIXED: Warning for PROBLEM 3 - Remind to check backend filters stats by userId
+        console.warn('Verify backend filters stats and history by userId to prevent seeing other users’ data.');
       } catch (err) {
         console.error("Failed to load dashboard stats", err);
       } finally {
@@ -29,7 +31,7 @@ export const DashboardPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-8">
-        
+       
         {/* Header Section */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
@@ -40,10 +42,9 @@ export const DashboardPage = () => {
             <Zap className="w-4 h-4" /> New Review
           </Button>
         </div>
-
         {/* 4 Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          
+         
           {/* Card 1: Total Reviews */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -55,7 +56,6 @@ export const DashboardPage = () => {
             <h3 className="text-3xl font-bold text-gray-900">{stats?.totalScans || 0}</h3>
             <p className="text-sm text-gray-500 mt-1">Total Reviews</p>
           </div>
-
           {/* Card 2: Average Score */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -67,7 +67,6 @@ export const DashboardPage = () => {
             <h3 className="text-3xl font-bold text-gray-900">{stats?.averageScore || 0}</h3>
             <p className="text-sm text-gray-500 mt-1">Average Score</p>
           </div>
-
           {/* Card 3: Issues Found */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -78,7 +77,6 @@ export const DashboardPage = () => {
             <h3 className="text-3xl font-bold text-gray-900">{stats?.totalIssues || 0}</h3>
             <p className="text-sm text-gray-500 mt-1">Issues Identified</p>
           </div>
-
           {/* Card 4: Suggestions */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-200">
             <div className="flex items-center justify-between mb-4">
@@ -90,14 +88,13 @@ export const DashboardPage = () => {
             <p className="text-sm text-gray-500 mt-1">Recent Scans</p>
           </div>
         </div>
-
         {/* Recent Activity List */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div className="p-6 border-b border-gray-100 flex justify-between items-center">
             <h3 className="font-bold text-lg text-gray-900">Recent Activity</h3>
             <Button variant="outline" onClick={() => navigate('/history')}>View All</Button>
           </div>
-          
+         
           <div className="divide-y divide-gray-100">
             {stats?.recentActivity.map((item) => (
               <div key={item._id} className="p-6 flex items-center justify-between hover:bg-gray-50 transition-colors">
@@ -121,13 +118,12 @@ export const DashboardPage = () => {
                 </div>
               </div>
             ))}
-            
+           
             {stats?.recentActivity.length === 0 && (
               <div className="p-8 text-center text-gray-500">No activity yet. Upload your first code!</div>
             )}
           </div>
         </div>
-
       </div>
     </DashboardLayout>
   );

@@ -15,6 +15,8 @@ export const HistoryPage = () => {
       try {
         const data = await codeApi.getHistory();
         setHistory(data);
+        // FIXED: Warning for PROBLEM 3 - Remind to check backend filters user history
+        console.warn('Verify backend filters history by userId to prevent seeing other users’ data.');
       } catch (err) {
         console.error("Failed to load history", err);
       } finally {
@@ -28,7 +30,6 @@ export const HistoryPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         <h1 className="text-2xl font-bold text-gray-900">Analysis History</h1>
-
         {loading ? (
           <div className="text-center py-10">Loading history...</div>
         ) : history.length === 0 ? (
@@ -38,10 +39,9 @@ export const HistoryPage = () => {
             {history.map((item) => {
               // ✅ SAFETY CHECK: If a scan failed and has no AI data, don't crash the app. Skip it.
               if (!item.aiResponse) return null;
-
               return (
-                <div 
-                  key={item._id} 
+                <div
+                  key={item._id}
                   onClick={() => navigate('/results', { state: item })}
                   className="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex justify-between items-center cursor-pointer hover:shadow-md transition-shadow"
                 >
@@ -61,7 +61,6 @@ export const HistoryPage = () => {
                       </p>
                     </div>
                   </div>
-
                   <div className="text-right">
                     <span className={`text-xl font-bold ${item.aiResponse.qualityScore >= 80 ? 'text-green-600' : 'text-red-600'}`}>
                       {item.aiResponse.qualityScore}/100

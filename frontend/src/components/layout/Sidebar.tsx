@@ -12,14 +12,11 @@ import {
 
 export const Sidebar: React.FC = () => {
   const location = useLocation();
-
   const isActive = (path: string) => location.pathname === path;
 
   const handleLogout = () => {
-    // Clear all stored data
+    // FIXED: Use localStorage.clear() for consistency with other logout flows
     localStorage.clear();
-    sessionStorage.clear();
-
     // Redirect to login page (hard reload)
     window.location.href = '/login';
   };
@@ -41,7 +38,6 @@ export const Sidebar: React.FC = () => {
           <span>CodeGuard</span>
         </div>
       </div>
-
       {/* Navigation */}
       <nav className="flex-1 px-4 py-6 space-y-1">
         {navItems.map((item) => (
@@ -49,29 +45,18 @@ export const Sidebar: React.FC = () => {
             key={item.path}
             to={item.path}
             className={`flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-lg transition-colors
-              ${
-                isActive(item.path)
-                  ? 'bg-primary-light text-primary'
-                  : 'text-gray-700 hover:bg-gray-50'
-              }`}
+              ${isActive(item.path) ? 'bg-primary-light text-primary' : 'text-gray-700 hover:bg-gray-50'}`}
           >
-            <item.icon
-              className={`h-5 w-5 ${
-                isActive(item.path) ? 'text-primary' : 'text-gray-500'
-              }`}
-            />
+            <item.icon className={`h-5 w-5 ${isActive(item.path) ? 'text-primary' : 'text-gray-500'}`} />
             {item.name}
           </Link>
         ))}
       </nav>
-
       {/* Logout */}
       <div className="p-4 border-t border-gray-200">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium
-                     text-gray-700 hover:bg-red-50 hover:text-red-600
-                     rounded-lg transition-colors"
+          className="flex items-center gap-3 px-4 py-3 w-full text-sm font-medium text-gray-700 hover:bg-red-50 hover:text-red-600 rounded-lg transition-colors"
         >
           <LogOut className="h-5 w-5" />
           <span>Sign Out</span>
